@@ -18,11 +18,26 @@ Then in your `init.lua`:
 vim.cmd.colorscheme("nova")
 ```
 
-## Usage
+## Configuration
 
-Simply load the colorscheme:
+### Transparent Background
 
+Enable transparent background with options:
+
+**With lazy.nvim:**
 ```lua
+{ 
+  "knt419/nova.nvim", 
+  lazy = false,
+  config = function()
+    vim.cmd.colorscheme("nova", { transparent_bg = true })
+  end
+}
+```
+
+**Or with global variable:**
+```lua
+vim.g.nova_transparent_bg = true
 vim.cmd.colorscheme("nova")
 ```
 
