@@ -17,10 +17,8 @@ end
 local highlight = function(group, fg, bg, gui)
   local opts = { fg = fg }
   
-  if not M.transparent_bg then
-    if bg then
-      opts.bg = bg == "NONE" or bg == "None" and "" or bg
-    end
+  if bg and not M.transparent_bg then
+    opts.bg = bg ~= "NONE" and bg or nil
   end
   
   if gui then
@@ -293,9 +291,10 @@ local function init(options)
   if M.transparent_bg then
     vim.opt.pumblend = 100
     vim.opt.winblend = 10
+    highlight("Normal", "#C5D4DD")
+  else
+    highlight("Normal", "#C5D4DD", "")
   end
-  
-  highlight("Normal", "#C5D4DD", "")
   
   ui_groups()
   syntax_groups()
