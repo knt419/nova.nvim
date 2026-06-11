@@ -5,7 +5,7 @@ M.transparent_bg = false
 local function setup(options)
   options = options or {}
   M.transparent_bg = options.transparent_bg or (vim.g.nova_transparent_bg == true) or false
-  
+
   vim.opt.background = "dark"
   vim.opt.termguicolors = true
   vim.cmd("highlight clear")
@@ -16,17 +16,17 @@ end
 
 local highlight = function(group, fg, bg, gui)
   local opts = { fg = fg }
-  
-  if bg and not M.transparent_bg then
-    opts.bg = bg ~= "NONE" and bg or nil
+
+  if bg then
+    opts.bg = M.transparent_bg and "NONE" or (bg ~= "NONE" and bg or nil)
   end
-  
+
   if gui then
     if gui:match("BOLD") then opts.bold = true end
     if gui:match("ITALIC") then opts.italic = true end
     if gui:match("UNDERLINE") then opts.underline = true end
   end
-  
+
   vim.api.nvim_set_hl(0, group, opts)
 end
 
@@ -49,34 +49,34 @@ local function setup_terminal_colors()
     "#7FC1CA",
     "#E6EEF3"
   }
-  
+
   for i, color in ipairs(terminal_colors) do
     vim.g["terminal_color_" .. (i - 1)] = color
   end
 end
 
 local function ui_groups()
-  highlight("Error", "#DF8C8C")
-  highlight("ErrorMsg", "#DF8C8C")
-  highlight("WarningMsg", "#DF8C8C")
-  highlight("SpellBad", "#DF8C8C")
-  highlight("SpellCap", "#DF8C8C")
-  highlight("Todo", "#DF8C8C")
-  highlight("NeomakeErrorSign", "#DF8C8C")
-  highlight("NeomakeWarningSign", "#DF8C8C")
+  highlight("Error", "#DF8C8C", "NONE")
+  highlight("ErrorMsg", "#DF8C8C", "NONE")
+  highlight("WarningMsg", "#DF8C8C", "NONE")
+  highlight("SpellBad", "#DF8C8C", "NONE")
+  highlight("SpellCap", "#DF8C8C", "NONE")
+  highlight("Todo", "#DF8C8C", "NONE")
+  highlight("NeomakeErrorSign", "#DF8C8C", "NONE")
+  highlight("NeomakeWarningSign", "#DF8C8C", "NONE")
 
   highlight("MatchParen", "#7FC1CA", "NONE")
-  highlight("CursorLineNr", "#7FC1CA")
+  highlight("CursorLineNr", "#7FC1CA", "NONE")
   highlight("Visual", "#3C4C55", "#7FC1CA")
   highlight("VisualNOS", "#3C4C55", "#7FC1CA")
-  highlight("Folded", "#7FC1CA")
-  highlight("FoldColumn", "#7FC1CA")
+  highlight("Folded", "#7FC1CA", "NONE")
+  highlight("FoldColumn", "#7FC1CA", "NONE")
   highlight("IncSearch", "#7FC1CA", "#1E272C")
   highlight("Search", "#7FC1CA", "#1E272C")
   highlight("WildMenu", "#556873", "#7FC1CA")
-  highlight("Question", "#7FC1CA")
-  highlight("MoreMsg", "#7FC1CA")
-  highlight("ModeMsg", "#7FC1CA")
+  highlight("Question", "#7FC1CA", "NONE")
+  highlight("MoreMsg", "#7FC1CA", "NONE")
+  highlight("ModeMsg", "#7FC1CA", "NONE")
   highlight("StatusLine", "#7FC1CA", "#556873")
   highlight("PmenuSel", "#556873", "#7FC1CA")
   highlight("PmenuThumb", "#7FC1CA", "#7FC1CA")
@@ -84,25 +84,25 @@ local function ui_groups()
 
   highlight("DiffAdd", "#3C4C55", "#A8CE93")
   highlight("DiffChange", "#3C4C55", "#F2C38F")
-  highlight("DiffDelete", "#DF8C8C")
+  highlight("DiffDelete", "#DF8C8C", "NONE")
   highlight("DiffText", "#3C4C55", "#F2C38F", "BOLD")
 
-  highlight("SignColumn", "NONE")
-  highlight("LineNr", "#6A7D89")
+  highlight("SignColumn", "NONE", "NONE")
+  highlight("LineNr", "#6A7D89", "NONE")
   highlight("CursorLine", "NONE", "#556873")
-  highlight("CursorColumn", "#556873")
-  highlight("EndOfBuffer", "#556873")
+  highlight("CursorColumn", "NONE", "#556873")
+  highlight("EndOfBuffer", "NONE", "#556873")
   highlight("VertSplit", "#556873", "#556873")
   highlight("StatusLineNC", "#3C4C55", "#556873")
   highlight("Pmenu", "#C5D4DD", "#556873")
   highlight("PmenuSbar", "#899BA6", "#899BA6")
-  highlight("ColorColumn", "#556873")
+  highlight("ColorColumn", "NONE", "#556873")
 end
 
 local function syntax_groups()
   highlight("Constant", "#7FC1CA")
   highlight("Directory", "#7FC1CA")
-  
+
   highlight("jsObjectBraces", "#7FC1CA")
   highlight("jsBrackets", "#7FC1CA")
   highlight("jsObjectValue", "#7FC1CA")
@@ -129,7 +129,7 @@ local function syntax_groups()
 
   highlight("markdownCode", "#7FC1CA")
   highlight("markdownCodeBlock", "#7FC1CA")
-  
+
   highlight("xmlString", "#7FC1CA")
   highlight("netrwPlain", "#7FC1CA")
   highlight("netrwDir", "#7FC1CA")
@@ -156,7 +156,7 @@ local function syntax_groups()
   highlight("htmlSpecialTagName", "#83AFE5")
   highlight("htmlTag", "#83AFE5")
   highlight("htmlEndTag", "#83AFE5")
-  
+
   highlight("jsonKeyword", "#83AFE5")
   highlight("xmlAttrib", "#83AFE5")
 
@@ -176,7 +176,7 @@ local function syntax_groups()
 
   highlight("htmlArg", "#DADA93")
   highlight("jsxRegion", "#DADA93")
-  
+
   highlight("xmlTag", "#DADA93")
   highlight("xmlEndTag", "#DADA93")
   highlight("xmlTagName", "#DADA93")
@@ -203,7 +203,7 @@ local function syntax_groups()
   highlight("PreProc", "#9A93E1")
   highlight("jsGlobalObjects", "#9A93E1")
   highlight("jsThis", "#9A93E1")
-  
+
   highlight("cssTagName", "#9A93E1")
   highlight("jsGlobalNodeObjects", "#9A93E1")
   highlight("cssFontDescriptor", "#9A93E1")
@@ -221,7 +221,7 @@ local function syntax_groups()
   highlight("SpecialKey", "#F2C38F")
   highlight("NonText", "#F2C38F")
   highlight("Title", "#F2C38F")
-  
+
   highlight("jsBraces", "#F2C38F")
   highlight("jsFuncBraces", "#F2C38F")
   highlight("jsDestructuringBraces", "#F2C38F")
@@ -230,7 +230,7 @@ local function syntax_groups()
   highlight("jsFuncParens", "#F2C38F")
   highlight("jsArrowFunction", "#F2C38F")
   highlight("jsModuleAsterisk", "#F2C38F")
-  
+
   highlight("cssBraces", "#F2C38F")
 
   highlight("markdownHeadingDelimiter", "#F2C38F")
@@ -261,7 +261,7 @@ local function syntax_groups()
   highlight("jsNoise", "#899BA6")
 
   highlight("cssClassNameDot", "#899BA6")
-  
+
   highlight("jsonQuote", "#899BA6")
   highlight("shQuote", "#899BA6")
 
@@ -287,7 +287,7 @@ end
 
 local function init(options)
   setup(options)
-  
+
   if M.transparent_bg then
     vim.opt.pumblend = 100
     vim.opt.winblend = 10
@@ -295,11 +295,11 @@ local function init(options)
   else
     highlight("Normal", "#C5D4DD", "")
   end
-  
+
   ui_groups()
   syntax_groups()
   plugin_highlights()
-  
+
   setup_terminal_colors()
 end
 
@@ -377,7 +377,7 @@ end
 local syntax_groups = function()
   highlight("Constant", "#7FC1CA")
   highlight("Directory", "#7FC1CA")
-  
+
   highlight("jsObjectBraces", "#7FC1CA")
   highlight("jsBrackets", "#7FC1CA")
   highlight("jsObjectValue", "#7FC1CA")
@@ -404,7 +404,7 @@ local syntax_groups = function()
 
   highlight("markdownCode", "#7FC1CA")
   highlight("markdownCodeBlock", "#7FC1CA")
-  
+
   highlight("xmlString", "#7FC1CA")
   highlight("netrwPlain", "#7FC1CA")
   highlight("netrwDir", "#7FC1CA")
@@ -431,7 +431,7 @@ local syntax_groups = function()
   highlight("htmlSpecialTagName", "#83AFE5")
   highlight("htmlTag", "#83AFE5")
   highlight("htmlEndTag", "#83AFE5")
-  
+
   highlight("jsonKeyword", "#83AFE5")
   highlight("xmlAttrib", "#83AFE5")
 
@@ -451,7 +451,7 @@ local syntax_groups = function()
 
   highlight("htmlArg", "#DADA93")
   highlight("jsxRegion", "#DADA93")
-  
+
   highlight("xmlTag", "#DADA93")
   highlight("xmlEndTag", "#DADA93")
   highlight("xmlTagName", "#DADA93")
@@ -478,7 +478,7 @@ local syntax_groups = function()
   highlight("PreProc", "#9A93E1")
   highlight("jsGlobalObjects", "#9A93E1")
   highlight("jsThis", "#9A93E1")
-  
+
   highlight("cssTagName", "#9A93E1")
   highlight("jsGlobalNodeObjects", "#9A93E1")
   highlight("cssFontDescriptor", "#9A93E1")
@@ -496,7 +496,7 @@ local syntax_groups = function()
   highlight("SpecialKey", "#F2C38F")
   highlight("NonText", "#F2C38F")
   highlight("Title", "#F2C38F")
-  
+
   highlight("jsBraces", "#F2C38F")
   highlight("jsFuncBraces", "#F2C38F")
   highlight("jsDestructuringBraces", "#F2C38F")
@@ -505,7 +505,7 @@ local syntax_groups = function()
   highlight("jsFuncParens", "#F2C38F")
   highlight("jsArrowFunction", "#F2C38F")
   highlight("jsModuleAsterisk", "#F2C38F")
-  
+
   highlight("cssBraces", "#F2C38F")
 
   highlight("markdownHeadingDelimiter", "#F2C38F")
@@ -536,7 +536,7 @@ local syntax_groups = function()
   highlight("jsNoise", "#899BA6")
 
   highlight("cssClassNameDot", "#899BA6")
-  
+
   highlight("jsonQuote", "#899BA6")
   highlight("shQuote", "#899BA6")
 
@@ -563,9 +563,9 @@ end
 local function init()
   setup()
   setup_terminal_colors()
-  
+
   highlight("Normal", "#C5D4DD", "")
-  
+
   ui_groups()
   syntax_groups()
   plugin_highlights()
