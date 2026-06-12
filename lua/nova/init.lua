@@ -2,8 +2,33 @@ local M = {}
 
 M.transparent_bg = false
 
+-- Color palette definition
+local colors = {
+  bg_dark = "#1E272C",
+  bg = "#556873",
+  bg_light = "#3C4C55",
+  fg = "#C5D4DD",
+  fg_muted = "#899BA6",
+  fg_dim = "#6A7D89",
+  cyan = "#7FC1CA",
+  blue = "#83AFE5",
+  yellow = "#DADA93",
+  green = "#A8CE93",
+  purple = "#9A93E1",
+  pink = "#D18EC2",
+  orange = "#F2C38F",
+  red = "#DF8C8C",
+  gray = "#899BA6",
+}
+
 local function setup(options)
   options = options or {}
+
+  -- Validate transparent_bg is boolean
+  if options.transparent_bg ~= nil and type(options.transparent_bg) ~= "boolean" then
+    error("transparent_bg must be a boolean")
+  end
+
   M.transparent_bg = options.transparent_bg or (vim.g.nova_transparent_bg == true) or false
 
   vim.opt.background = "dark"
@@ -17,36 +42,43 @@ end
 local highlight = function(group, fg, bg, gui)
   local opts = { fg = fg }
 
-  if bg then
-    opts.bg = M.transparent_bg and "NONE" or (bg ~= "NONE" and bg or nil)
+  if bg and bg ~= "NONE" then
+    opts.bg = M.transparent_bg and "NONE" or bg
   end
 
   if gui then
-    if gui:match("BOLD") then opts.bold = true end
-    if gui:match("ITALIC") then opts.italic = true end
-    if gui:match("UNDERLINE") then opts.underline = true end
+    local gui_map = { BOLD = "bold", ITALIC = "italic", UNDERLINE = "underline" }
+    for key, opt in pairs(gui_map) do
+      if gui:match(key) then opts[opt] = true end
+    end
   end
 
   vim.api.nvim_set_hl(0, group, opts)
 end
 
+local function highlight_group(color, groups)
+  for _, group in ipairs(groups) do
+    highlight(group, color)
+  end
+end
+
 local function setup_terminal_colors()
   local terminal_colors = {
-    "#3C4C55",
-    "#DF8C8C",
-    "#A8CE93",
-    "#DADA93",
-    "#83AFE5",
-    "#9A93E1",
-    "#7FC1CA",
-    "#C5D4DD",
-    "#899BA6",
-    "#F2C38F",
-    "#A8CE93",
-    "#DADA93",
-    "#83AFE5",
-    "#D18EC2",
-    "#7FC1CA",
+    colors.bg_light,
+    colors.red,
+    colors.green,
+    colors.yellow,
+    colors.blue,
+    colors.purple,
+    colors.cyan,
+    colors.fg,
+    colors.gray,
+    colors.orange,
+    colors.green,
+    colors.yellow,
+    colors.blue,
+    colors.pink,
+    colors.cyan,
     "#E6EEF3"
   }
 
@@ -56,233 +88,147 @@ local function setup_terminal_colors()
 end
 
 local function ui_groups()
-  highlight("Error", "#DF8C8C", "NONE")
-  highlight("ErrorMsg", "#DF8C8C", "NONE")
-  highlight("WarningMsg", "#DF8C8C", "NONE")
-  highlight("SpellBad", "#DF8C8C", "NONE")
-  highlight("SpellCap", "#DF8C8C", "NONE")
-  highlight("Todo", "#DF8C8C", "NONE")
-  highlight("NeomakeErrorSign", "#DF8C8C", "NONE")
-  highlight("NeomakeWarningSign", "#DF8C8C", "NONE")
+  -- Error and warning messages
+  highlight_group(colors.red, {
+    "Error", "ErrorMsg", "WarningMsg", "SpellBad", "SpellCap", "Todo",
+    "NeomakeErrorSign", "NeomakeWarningSign"
+  })
 
-  highlight("MatchParen", "#7FC1CA", "NONE")
-  highlight("CursorLineNr", "#7FC1CA", "NONE")
-  highlight("Visual", "#3C4C55", "#7FC1CA")
-  highlight("VisualNOS", "#3C4C55", "#7FC1CA")
-  highlight("Folded", "#7FC1CA", "NONE")
-  highlight("FoldColumn", "#7FC1CA", "NONE")
-  highlight("IncSearch", "#7FC1CA", "#1E272C")
-  highlight("Search", "#7FC1CA", "#1E272C")
-  highlight("WildMenu", "#556873", "#7FC1CA")
-  highlight("Question", "#7FC1CA", "NONE")
-  highlight("MoreMsg", "#7FC1CA", "NONE")
-  highlight("ModeMsg", "#7FC1CA", "NONE")
-  highlight("StatusLine", "#7FC1CA", "#556873")
-  highlight("PmenuSel", "#556873", "#7FC1CA")
-  highlight("PmenuThumb", "#7FC1CA", "#7FC1CA")
-  highlight("CtrlPMatch", "#3C4C55", "#7FC1CA")
+  -- Matching and selection
+  highlight("MatchParen", colors.cyan)
+  highlight("CursorLineNr", colors.cyan)
+  highlight("Visual", colors.bg_light, colors.cyan)
+  highlight("VisualNOS", colors.bg_light, colors.cyan)
+  highlight("Folded", colors.cyan)
+  highlight("FoldColumn", colors.cyan)
+  highlight("IncSearch", colors.cyan, colors.bg_dark)
+  highlight("Search", colors.cyan, colors.bg_dark)
+  highlight("WildMenu", colors.bg, colors.cyan)
+  highlight("Question", colors.cyan)
+  highlight("MoreMsg", colors.cyan)
+  highlight("ModeMsg", colors.cyan)
+  highlight("StatusLine", colors.cyan, colors.bg)
+  highlight("PmenuSel", colors.bg, colors.cyan)
+  highlight("PmenuThumb", colors.cyan, colors.cyan)
+  highlight("CtrlPMatch", colors.bg_light, colors.cyan)
 
-  highlight("DiffAdd", "#3C4C55", "#A8CE93")
-  highlight("DiffChange", "#3C4C55", "#F2C38F")
-  highlight("DiffDelete", "#DF8C8C", "NONE")
-  highlight("DiffText", "#3C4C55", "#F2C38F", "BOLD")
+  -- Diff highlighting
+  highlight("DiffAdd", colors.bg_light, colors.green)
+  highlight("DiffChange", colors.bg_light, colors.orange)
+  highlight("DiffDelete", colors.red)
+  highlight("DiffText", colors.bg_light, colors.orange, "BOLD")
 
-  highlight("SignColumn", "NONE", "NONE")
-  highlight("LineNr", "#6A7D89", "NONE")
-  highlight("CursorLine", "NONE", "#556873")
-  highlight("CursorColumn", "NONE", "#556873")
-  highlight("EndOfBuffer", "NONE", "#556873")
-  highlight("VertSplit", "#556873", "#556873")
-  highlight("StatusLineNC", "#3C4C55", "#556873")
-  highlight("Pmenu", "#C5D4DD", "#556873")
-  highlight("PmenuSbar", "#899BA6", "#899BA6")
-  highlight("ColorColumn", "NONE", "#556873")
+  -- UI elements
+  highlight("SignColumn", "NONE")
+  highlight("LineNr", colors.fg_dim)
+  highlight("CursorLine", "NONE", colors.bg)
+  highlight("CursorColumn", "NONE", colors.bg)
+  highlight("EndOfBuffer", "NONE", colors.bg)
+  highlight("VertSplit", colors.bg, colors.bg)
+  highlight("StatusLineNC", colors.bg_light, colors.bg)
+  highlight("Pmenu", colors.fg, colors.bg)
+  highlight("PmenuSbar", colors.fg_muted, colors.fg_muted)
+  highlight("ColorColumn", "NONE", colors.bg)
 end
 
 local function syntax_groups()
-  highlight("Constant", "#7FC1CA")
-  highlight("Directory", "#7FC1CA")
+  -- Cyan: Constants, basic structures
+  highlight_group(colors.cyan, {
+    "Constant", "Directory",
+    "jsObjectBraces", "jsBrackets", "jsObjectValue", "jsParen",
+    "jsParenSwitch", "jsParenIfElse", "jsBracket", "jsTernaryIf",
+    "jsTemplateString", "jsTemplateVar",
+    "cssAttr", "cssAttrRegion", "cssAttributeSelector",
+    "htmlTitle", "htmlH1", "htmlH2", "htmlH3", "htmlH4", "htmlH5", "htmlH6", "htmlLink",
+    "markdownCode", "markdownCodeBlock",
+    "xmlString", "netrwPlain", "netrwDir", "shDerefSimple"
+  })
 
-  highlight("jsObjectBraces", "#7FC1CA")
-  highlight("jsBrackets", "#7FC1CA")
-  highlight("jsObjectValue", "#7FC1CA")
-  highlight("jsParen", "#7FC1CA")
-  highlight("jsParenSwitch", "#7FC1CA")
-  highlight("jsParenIfElse", "#7FC1CA")
-  highlight("jsBracket", "#7FC1CA")
-  highlight("jsTernaryIf", "#7FC1CA")
-  highlight("jsTemplateString", "#7FC1CA")
-  highlight("jsTemplateVar", "#7FC1CA")
+  -- Blue: Identifiers, declarations
+  highlight_group(colors.blue, {
+    "Identifier", "jsVariableDef", "jsObject", "jsObjectKey",
+    "jsObjectStringKey", "jsFuncArgs", "jsDestructuringBlock",
+    "jsDestructuringArray", "jsDestructuringPropertyValue",
+    "jsSpreadExpression", "jsImportContainer", "jsExportContainer",
+    "jsModuleGroup",
+    "cssClassName", "cssIdentifier",
+    "htmlTagName", "htmlSpecialTagName", "htmlTag", "htmlEndTag",
+    "jsonKeyword", "xmlAttrib",
+    "netrwExe", "shFunction",
+    "typescriptVariableDeclaration", "typescriptCall"
+  })
 
-  highlight("cssAttr", "#7FC1CA")
-  highlight("cssAttrRegion", "#7FC1CA")
-  highlight("cssAttributeSelector", "#7FC1CA")
+  -- Yellow: Statements, operators
+  highlight_group(colors.yellow, {
+    "Statement", "jsFuncCall", "jsOperator", "jsSpreadOperator",
+    "cssFunctionName", "cssProp",
+    "htmlArg", "jsxRegion",
+    "xmlTag", "xmlEndTag", "xmlTagName", "xmlEqual",
+    "shCmdSubRegion",
+    "typescriptOperator", "typescriptOpSymbols", "typescriptProp"
+  })
 
-  highlight("htmlTitle", "#7FC1CA")
-  highlight("htmlH1", "#7FC1CA")
-  highlight("htmlH2", "#7FC1CA")
-  highlight("htmlH3", "#7FC1CA")
-  highlight("htmlH4", "#7FC1CA")
-  highlight("htmlH5", "#7FC1CA")
-  highlight("htmlH6", "#7FC1CA")
-  highlight("htmlLink", "#7FC1CA")
+  -- Green: Types, keywords
+  highlight_group(colors.green, {
+    "Type", "jsFunction", "jsStorageClass", "jsNan",
+    "shFunctionKey",
+    "typescriptEnumKeyword", "typescriptVariable",
+    "typescriptFuncKeyword", "typescriptDefault"
+  })
 
-  highlight("markdownCode", "#7FC1CA")
-  highlight("markdownCodeBlock", "#7FC1CA")
+  -- Purple: Preprocessor, globals
+  highlight_group(colors.purple, {
+    "PreProc", "jsGlobalObjects", "jsThis",
+    "cssTagName", "jsGlobalNodeObjects", "cssFontDescriptor",
+    "typescriptGlobal", "typescriptExport", "typescriptImport"
+  })
 
-  highlight("xmlString", "#7FC1CA")
-  highlight("netrwPlain", "#7FC1CA")
-  highlight("netrwDir", "#7FC1CA")
-  highlight("shDerefSimple", "#7FC1CA")
+  -- Pink: Underlined, emphasis
+  highlight_group(colors.pink, {
+    "Underlined", "markdownItalic", "markdownBold", "markdownBoldItalic"
+  })
 
-  highlight("Identifier", "#83AFE5")
-  highlight("jsVariableDef", "#83AFE5")
-  highlight("jsObject", "#83AFE5")
-  highlight("jsObjectKey", "#83AFE5")
-  highlight("jsObjectStringKey", "#83AFE5")
-  highlight("jsFuncArgs", "#83AFE5")
-  highlight("jsDestructuringBlock", "#83AFE5")
-  highlight("jsDestructuringArray", "#83AFE5")
-  highlight("jsDestructuringPropertyValue", "#83AFE5")
-  highlight("jsSpreadExpression", "#83AFE5")
-  highlight("jsImportContainer", "#83AFE5")
-  highlight("jsExportContainer", "#83AFE5")
-  highlight("jsModuleGroup", "#83AFE5")
+  -- Orange: Special characters, braces, punctuation
+  highlight_group(colors.orange, {
+    "Special", "SpecialKey", "NonText", "Title",
+    "jsBraces", "jsFuncBraces", "jsDestructuringBraces",
+    "jsClassBraces", "jsParens", "jsFuncParens",
+    "jsArrowFunction", "jsModuleAsterisk",
+    "cssBraces",
+    "markdownHeadingDelimiter", "markdownH1", "markdownH2",
+    "markdownH3", "markdownH4", "markdownH5", "markdownH6",
+    "markdownRule", "markdownListMarker", "markdownOrderedListMarker",
+    "markdownLinkText", "markdownCodeDelimiter",
+    "netrwClassify", "netrwVersion", "CtrlPStats",
+    "typescriptParens", "typescriptBraces", "typescriptArrowFunc"
+  })
 
-  highlight("cssClassName", "#83AFE5")
-  highlight("cssIdentifier", "#83AFE5")
-
-  highlight("htmlTagName", "#83AFE5")
-  highlight("htmlSpecialTagName", "#83AFE5")
-  highlight("htmlTag", "#83AFE5")
-  highlight("htmlEndTag", "#83AFE5")
-
-  highlight("jsonKeyword", "#83AFE5")
-  highlight("xmlAttrib", "#83AFE5")
-
-  highlight("netrwExe", "#83AFE5")
-  highlight("shFunction", "#83AFE5")
-
-  highlight("typescriptVariableDeclaration", "#83AFE5")
-  highlight("typescriptCall", "#83AFE5")
-
-  highlight("Statement", "#DADA93")
-  highlight("jsFuncCall", "#DADA93")
-  highlight("jsOperator", "#DADA93")
-  highlight("jsSpreadOperator", "#DADA93")
-
-  highlight("cssFunctionName", "#DADA93")
-  highlight("cssProp", "#DADA93")
-
-  highlight("htmlArg", "#DADA93")
-  highlight("jsxRegion", "#DADA93")
-
-  highlight("xmlTag", "#DADA93")
-  highlight("xmlEndTag", "#DADA93")
-  highlight("xmlTagName", "#DADA93")
-  highlight("xmlEqual", "#DADA93")
-
-  highlight("shCmdSubRegion", "#DADA93")
-
-  highlight("typescriptOperator", "#DADA93")
-  highlight("typescriptOpSymbols", "#DADA93")
-  highlight("typescriptProp", "#DADA93")
-
-  highlight("Type", "#A8CE93")
-  highlight("jsFunction", "#A8CE93")
-  highlight("jsStorageClass", "#A8CE93")
-  highlight("jsNan", "#A8CE93")
-
-  highlight("shFunctionKey", "#A8CE93")
-
-  highlight("typescriptEnumKeyword", "#A8CE93")
-  highlight("typescriptVariable", "#A8CE93")
-  highlight("typescriptFuncKeyword", "#A8CE93")
-  highlight("typescriptDefault", "#A8CE93")
-
-  highlight("PreProc", "#9A93E1")
-  highlight("jsGlobalObjects", "#9A93E1")
-  highlight("jsThis", "#9A93E1")
-
-  highlight("cssTagName", "#9A93E1")
-  highlight("jsGlobalNodeObjects", "#9A93E1")
-  highlight("cssFontDescriptor", "#9A93E1")
-
-  highlight("typescriptGlobal", "#9A93E1")
-  highlight("typescriptExport", "#9A93E1")
-  highlight("typescriptImport", "#9A93E1")
-
-  highlight("Underlined", "#D18EC2")
-  highlight("markdownItalic", "#D18EC2")
-  highlight("markdownBold", "#D18EC2")
-  highlight("markdownBoldItalic", "#D18EC2")
-
-  highlight("Special", "#F2C38F")
-  highlight("SpecialKey", "#F2C38F")
-  highlight("NonText", "#F2C38F")
-  highlight("Title", "#F2C38F")
-
-  highlight("jsBraces", "#F2C38F")
-  highlight("jsFuncBraces", "#F2C38F")
-  highlight("jsDestructuringBraces", "#F2C38F")
-  highlight("jsClassBraces", "#F2C38F")
-  highlight("jsParens", "#F2C38F")
-  highlight("jsFuncParens", "#F2C38F")
-  highlight("jsArrowFunction", "#F2C38F")
-  highlight("jsModuleAsterisk", "#F2C38F")
-
-  highlight("cssBraces", "#F2C38F")
-
-  highlight("markdownHeadingDelimiter", "#F2C38F")
-  highlight("markdownH1", "#F2C38F")
-  highlight("markdownH2", "#F2C38F")
-  highlight("markdownH3", "#F2C38F")
-  highlight("markdownH4", "#F2C38F")
-  highlight("markdownH5", "#F2C38F")
-  highlight("markdownH6", "#F2C38F")
-  highlight("markdownRule", "#F2C38F")
-  highlight("markdownListMarker", "#F2C38F")
-  highlight("markdownOrderedListMarker", "#F2C38F")
-  highlight("markdownLinkText", "#F2C38F")
-  highlight("markdownCodeDelimiter", "#F2C38F")
-
-  highlight("netrwClassify", "#F2C38F")
-  highlight("netrwVersion", "#F2C38F")
-  highlight("CtrlPStats", "#F2C38F")
-
-  highlight("typescriptParens", "#F2C38F")
-  highlight("typescriptBraces", "#F2C38F")
-  highlight("typescriptArrowFunc", "#F2C38F")
-
-  highlight("Comment", "#899BA6")
-  highlight("Ignore", "#899BA6")
-  highlight("Conceal", "#899BA6")
-  highlight("Noise", "#899BA6")
-  highlight("jsNoise", "#899BA6")
-
-  highlight("cssClassNameDot", "#899BA6")
-
-  highlight("jsonQuote", "#899BA6")
-  highlight("shQuote", "#899BA6")
-
-  highlight("typescriptEndColons", "#899BA6")
-  highlight("typescriptTemplateSB", "#899BA6")
+  -- Gray: Comments, noise
+  highlight_group(colors.gray, {
+    "Comment", "Ignore", "Conceal", "Noise", "jsNoise",
+    "cssClassNameDot",
+    "jsonQuote", "shQuote",
+    "typescriptEndColons", "typescriptTemplateSB"
+  })
 end
 
 local function plugin_highlights()
-  highlight("GitGutterAdd", "#A8CE93")
-  highlight("GitGutterChange", "#F2C38F")
-  highlight("GitGutterChangeDelete", "#F2C38F")
-  highlight("GitGutterDelete", "#DF8C8C")
+  -- Git Gutter
+  highlight("GitGutterAdd", colors.green)
+  highlight("GitGutterChange", colors.orange)
+  highlight("GitGutterChangeDelete", colors.orange)
+  highlight("GitGutterDelete", colors.red)
 
-  highlight("EasyMotionTarget", "#DF8C8C", "", "BOLD")
-  highlight("EasyMotionTarget2First", "#F2C38F")
-  highlight("EasyMotionTarget2Second", "#DADA93")
-  highlight("EasyMotionShade", "#899BA6")
+  -- Easy Motion
+  highlight("EasyMotionTarget", colors.red, "NONE", "BOLD")
+  highlight("EasyMotionTarget2First", colors.orange)
+  highlight("EasyMotionTarget2Second", colors.yellow)
+  highlight("EasyMotionShade", colors.gray)
 
-  highlight("fzf1", "#3C4C55", "#556873")
-  highlight("fzf2", "#3C4C55", "#556873")
-  highlight("fzf3", "#3C4C55", "#556873")
+  -- FZF
+  highlight("fzf1", colors.bg_light, colors.bg)
+  highlight("fzf2", colors.bg_light, colors.bg)
+  highlight("fzf3", colors.bg_light, colors.bg)
 end
 
 local function init(options)
@@ -291,9 +237,9 @@ local function init(options)
   if M.transparent_bg then
     vim.opt.pumblend = 100
     vim.opt.winblend = 10
-    highlight("Normal", "#C5D4DD")
+    highlight("Normal", colors.fg)
   else
-    highlight("Normal", "#C5D4DD", "")
+    highlight("Normal", colors.fg, "")
   end
 
   ui_groups()
