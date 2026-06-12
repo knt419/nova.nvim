@@ -1,1 +1,1 @@
-lua require('nova').load()
+require('nova').load()
