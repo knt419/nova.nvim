@@ -95,6 +95,8 @@ local function ui_groups()
     "Error", "ErrorMsg", "WarningMsg", "SpellBad", "SpellCap", "Todo",
     "NeomakeErrorSign", "NeomakeWarningSign"
   })
+  -- Base
+  highlight("Normal", colors.fg, colors.bg)
 
   -- Matching and selection
   highlight("MatchParen", colors.cyan)
@@ -131,6 +133,7 @@ local function ui_groups()
   highlight("Pmenu", colors.fg, colors.bg)
   highlight("PmenuSbar", colors.fg_muted, colors.fg_muted)
   highlight("ColorColumn", "NONE", colors.bg)
+  highlight("FloatBorder", colors.fg, colors.bg)
 end
 
 local function syntax_groups()
@@ -239,9 +242,6 @@ local function init(options)
   if M.transparent_bg then
     vim.opt.pumblend = 100
     vim.opt.winblend = 10
-    highlight("Normal", colors.fg)
-  else
-    highlight("Normal", colors.fg, "")
   end
 
   ui_groups()
@@ -249,6 +249,7 @@ local function init(options)
   plugin_highlights()
 
   setup_terminal_colors()
+
 end
 
 return { init = init }
