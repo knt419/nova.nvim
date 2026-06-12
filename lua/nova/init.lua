@@ -42,8 +42,10 @@ end
 local highlight = function(group, fg, bg, gui)
   local opts = { fg = fg }
 
-  if bg and bg ~= "NONE" then
+  if bg and bg ~= "" then
     opts.bg = M.transparent_bg and "NONE" or bg
+  elseif bg == "" and not M.transparent_bg then
+    opts.bg = colors.bg
   end
 
   if gui then
