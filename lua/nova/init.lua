@@ -97,6 +97,7 @@ local function ui_groups()
   })
   -- Base
   highlight("Normal", colors.fg, colors.bg)
+  highlight("NormalFloat", colors.fg, colors.bg)
 
   -- Matching and selection
   highlight("MatchParen", colors.cyan)
@@ -133,7 +134,6 @@ local function ui_groups()
   highlight("Pmenu", colors.fg, colors.bg)
   highlight("PmenuSbar", colors.fg_muted, colors.fg_muted)
   highlight("ColorColumn", "NONE", colors.bg)
-  highlight("FloatBorder", colors.fg, colors.bg)
 end
 
 local function syntax_groups()
