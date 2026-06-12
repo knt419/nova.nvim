@@ -1,1 +1,1 @@
-require('nova').load()
+require('nova').init()
