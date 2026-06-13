@@ -21,15 +21,20 @@ local colors = {
   gray = "#899BA6",
 }
 
+local hl = require("nova.highlight")
+local highlight = hl.highlight
+local highlight_group = hl.highlight_group
+
 local function setup(options)
   options = options or {}
 
-  -- Validate transparent_bg is boolean
   if options.transparent_bg ~= nil and type(options.transparent_bg) ~= "boolean" then
     error("transparent_bg must be a boolean")
   end
 
   M.transparent_bg = options.transparent_bg or (vim.g.nova_transparent_bg == true) or false
+
+  hl.setup({ transparent_bg = M.transparent_bg })
 
   vim.opt.background = "dark"
   vim.opt.termguicolors = true
@@ -37,31 +42,6 @@ local function setup(options)
   vim.cmd("syntax on")
 
   vim.g.colors_name = "nova"
-end
-
-local highlight = function(group, fg, bg, gui)
-  local opts = { fg = fg }
-
-  if bg and bg ~= "" then
-    opts.bg = M.transparent_bg and "NONE" or bg
-  elseif bg == "" and not M.transparent_bg then
-    opts.bg = colors.bg
-  end
-
-  if gui then
-    local gui_map = { BOLD = "bold", ITALIC = "italic", UNDERLINE = "underline" }
-    for key, opt in pairs(gui_map) do
-      if gui:match(key) then opts[opt] = true end
-    end
-  end
-
-  vim.api.nvim_set_hl(0, group, opts)
-end
-
-local function highlight_group(color, groups)
-  for _, group in ipairs(groups) do
-    highlight(group, color)
-  end
 end
 
 local function setup_terminal_colors()
@@ -90,16 +70,12 @@ local function setup_terminal_colors()
 end
 
 local function ui_groups()
-  -- Error and warning messages
   highlight_group(colors.red, {
     "Error", "ErrorMsg", "WarningMsg", "SpellBad", "SpellCap", "Todo",
     "NeomakeErrorSign", "NeomakeWarningSign"
   })
-  -- Base
   highlight("Normal", colors.fg, colors.bg)
   highlight("NormalFloat", colors.fg, colors.bg)
-
-  -- Matching and selection
   highlight("MatchParen", colors.cyan)
   highlight("CursorLineNr", colors.cyan)
   highlight("Visual", colors.bg_light, colors.cyan)
@@ -116,14 +92,10 @@ local function ui_groups()
   highlight("PmenuSel", colors.bg, colors.cyan)
   highlight("PmenuThumb", colors.cyan, colors.cyan)
   highlight("CtrlPMatch", colors.bg_light, colors.cyan)
-
-  -- Diff highlighting
   highlight("DiffAdd", colors.bg_light, colors.green)
   highlight("DiffChange", colors.bg_light, colors.orange)
   highlight("DiffDelete", colors.red)
   highlight("DiffText", colors.bg_light, colors.orange, "BOLD")
-
-  -- UI elements
   highlight("SignColumn", "NONE")
   highlight("LineNr", colors.fg_dim)
   highlight("CursorLine", "NONE", colors.bg)
@@ -137,7 +109,6 @@ local function ui_groups()
 end
 
 local function syntax_groups()
-  -- Cyan: Constants, basic structures
   highlight_group(colors.cyan, {
     "Constant", "Directory",
     "jsObjectBraces", "jsBrackets", "jsObjectValue", "jsParen",
@@ -149,7 +120,6 @@ local function syntax_groups()
     "xmlString", "netrwPlain", "netrwDir", "shDerefSimple"
   })
 
-  -- Blue: Identifiers, declarations
   highlight_group(colors.blue, {
     "Identifier", "jsVariableDef", "jsObject", "jsObjectKey",
     "jsObjectStringKey", "jsFuncArgs", "jsDestructuringBlock",
@@ -163,7 +133,6 @@ local function syntax_groups()
     "typescriptVariableDeclaration", "typescriptCall"
   })
 
-  -- Yellow: Statements, operators
   highlight_group(colors.yellow, {
     "Statement", "jsFuncCall", "jsOperator", "jsSpreadOperator",
     "cssFunctionName", "cssProp",
@@ -173,7 +142,6 @@ local function syntax_groups()
     "typescriptOperator", "typescriptOpSymbols", "typescriptProp"
   })
 
-  -- Green: Types, keywords
   highlight_group(colors.green, {
     "Type", "jsFunction", "jsStorageClass", "jsNan",
     "shFunctionKey",
@@ -181,19 +149,16 @@ local function syntax_groups()
     "typescriptFuncKeyword", "typescriptDefault"
   })
 
-  -- Purple: Preprocessor, globals
   highlight_group(colors.purple, {
     "PreProc", "jsGlobalObjects", "jsThis",
     "cssTagName", "jsGlobalNodeObjects", "cssFontDescriptor",
     "typescriptGlobal", "typescriptExport", "typescriptImport"
   })
 
-  -- Pink: Underlined, emphasis
   highlight_group(colors.pink, {
     "Underlined", "markdownItalic", "markdownBold", "markdownBoldItalic"
   })
 
-  -- Orange: Special characters, braces, punctuation
   highlight_group(colors.orange, {
     "Special", "SpecialKey", "NonText", "Title",
     "jsBraces", "jsFuncBraces", "jsDestructuringBraces",
@@ -208,32 +173,12 @@ local function syntax_groups()
     "typescriptParens", "typescriptBraces", "typescriptArrowFunc"
   })
 
-  -- Gray: Comments, noise
   highlight_group(colors.gray, {
     "Comment", "Ignore", "Conceal", "Noise", "jsNoise",
     "cssClassNameDot",
     "jsonQuote", "shQuote",
     "typescriptEndColons", "typescriptTemplateSB"
   })
-end
-
-local function plugin_highlights()
-  -- Git Gutter
-  highlight("GitGutterAdd", colors.green)
-  highlight("GitGutterChange", colors.orange)
-  highlight("GitGutterChangeDelete", colors.orange)
-  highlight("GitGutterDelete", colors.red)
-
-  -- Easy Motion
-  highlight("EasyMotionTarget", colors.red, "NONE", "BOLD")
-  highlight("EasyMotionTarget2First", colors.orange)
-  highlight("EasyMotionTarget2Second", colors.yellow)
-  highlight("EasyMotionShade", colors.gray)
-
-  -- FZF
-  highlight("fzf1", colors.bg_light, colors.bg)
-  highlight("fzf2", colors.bg_light, colors.bg)
-  highlight("fzf3", colors.bg_light, colors.bg)
 end
 
 local function init(options)
@@ -246,10 +191,9 @@ local function init(options)
 
   ui_groups()
   syntax_groups()
-  plugin_highlights()
+  require("nova.integrations").load()
 
   setup_terminal_colors()
-
 end
 
 return { init = init }
